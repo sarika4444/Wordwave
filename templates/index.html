@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WordWave - Translator & Speech</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background-color: #f9f9f9; }
+        h1 { text-align: center; }
+        form { background: #fff; padding: 20px; margin-bottom: 30px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        label { display: block; margin-top: 10px; font-weight: bold; }
+        input, select, textarea, button { margin-top: 5px; width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; }
+        button { background-color: #4CAF50; color: white; cursor: pointer; }
+        button:hover { background-color: #45a049; }
+        audio { margin-top: 10px; width: 100%; }
+        .error { color: red; font-weight: bold; margin-top: 10px; }
+        .output-text { background-color: #e6e6e6; padding: 10px; border-radius: 5px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>WordWave Translator & Speech</h1>
+
+    <!-- Text Translation Form -->
+    <form action="/tts" method="post">
+        <h2>Text Translation</h2>
+        <label for="text">Enter Text:</label>
+        <textarea name="text" rows="3" placeholder="Type your text here..." required></textarea>
+
+        <label for="src_lang">Source Language (optional):</label>
+        <select name="src_lang">
+            <option value="">Auto Detect</option>
+            {% for code, name in languages.items() %}
+                <option value="{{ code }}">{{ name }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="tgt_lang">Translate To:</label>
+        <select name="tgt_lang" required>
+            {% for code, name in languages.items() %}
+                <option value="{{ code }}">{{ name }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Translate Text & Generate Speech</button>
+    </form>
+
+    <!-- Voice Translation Form -->
+    <form action="/stt" method="post">
+        <h2>Voice Translation</h2>
+
+        <label>Record Your Voice:</label>
+        <button type="button" id="start-record">Start Recording</button>
+        <button type="button" id="stop-record" disabled>Stop Recording</button>
+
+        <input type="hidden" name="audio" id="audio-file">
+        <label for="tgt_lang">Translate Voice To:</label>
+        <select name="tgt_lang" required>
+            {% for code, name in languages.items() %}
+                <option value="{{ code }}">{{ name }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Translate Voice & Generate Speech</button>
+    </form>
+
+    <!-- Display Translated Text -->
+    {% if stt_text %}
+        <div class="output-text">
+            <strong>Translated Text:</strong>
+            <p>{{ stt_text }}</p>
+        </div>
+    {% endif %}
+
+    <!-- Play Audio -->
+    {% if tts_audio %}
+        <audio controls autoplay>
+            <source src="{{ tts_audio }}" type="audio/mpeg">
+        </audio>
+    {% endif %}
+
+    <!-- Error Message -->
+    {% if error %}
+        <div class="error">{{ error }}</div>
+    {% endif %}
+
+    <!-- Browser Recording Script -->
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+
+        const startBtn = document.getElementById('start-record');
+        const stopBtn = document.getElementById('stop-record');
+        const audioInput = document.getElementById('audio-file');
+
+        startBtn.onclick = async () => {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+
+            mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+            mediaRecorder.onstop = () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                const reader = new FileReader();
+                reader.onload = () => {
+                    audioInput.value = reader.result.split(',')[1]; // Base64
+                };
+                reader.readAsDataURL(audioBlob);
+            };
+
+            mediaRecorder.start();
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+        };
+
+        stopBtn.onclick = () => {
+            mediaRecorder.stop();
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+        };
+    </script>
+</body>
+</html>
