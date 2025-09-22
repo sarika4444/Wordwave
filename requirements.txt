@@ -3,3 +3,7 @@ gTTS==2.5.4
 torch==2.3.1
 openai-whisper==20250625
 googletrans==4.0.0-rc1
+opencv-python==4.8.1.78
+mediapipe==0.10.7
+pywin32==306
+Werkzeug==2.3.7

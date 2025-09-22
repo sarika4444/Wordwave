@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block title %}Voice Translation · WordWave{% endblock %}
+{% block content %}
+<section class="card">
+  <h2>Voice Translation</h2>
+  <div id="modeChooser" style="display:flex;gap:16px;flex-wrap:wrap;margin:12px 0">
+    <button class="btn" type="button" id="modeUpload">Upload</button>
+    <button class="btn" type="button" id="modeLive">Live Record</button>
+  </div>
+
+  <form id="uploadForm" method="post" action="{{ url_for('stt') }}" enctype="multipart/form-data" style="display:none">
+    <label>Upload Audio File</label>
+    <input type="file" name="audio" accept="audio/*">
+    <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">
+      <div>
+        <label>From</label>
+        <select name="src_lang">
+          <option value="">Auto Detect</option>
+          {% for code, lang in languages.items() %}
+            <option value="{{ code }}">{{ lang }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label>To</label>
+        <select name="tgt_lang">
+          {% for code, lang in languages.items() %}
+            <option value="{{ code }}">{{ lang }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <button class="btn" type="submit" style="margin-top:12px">Translate</button>
+  </form>
+
+  <hr style="margin:20px 0">
+  <div id="liveControls" style="display:none">
+    <h3>Live Record</h3>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <button class="btn" type="button" id="recordBtn">🎙️ Start Recording</button>
+      <div>
+        <label>From</label>
+        <select id="liveSourceLang">
+          <option value="">Auto Detect</option>
+          {% for code, lang in languages.items() %}
+            <option value="{{ code }}">{{ lang }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label>To</label>
+        <select id="liveTargetLang">
+          {% for code, lang in languages.items() %}
+            <option value="{{ code }}">{{ lang }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button class="btn" type="button" id="translateBtn">Translate</button>
+      <span id="recordStatus" style="color:#6b7280">Idle</span>
+    </div>
+    <audio id="liveAudio" controls style="margin-top:10px; display:none"></audio>
+  </div>
+  <audio id="liveAudio" controls style="margin-top:10px; display:none"></audio>
+
+  {% if error %}
+    <p style="color:red">{{ error }}</p>
+  {% endif %}
+
+  {% if stt_text %}
+    <h3>Translated Text</h3>
+    <div class="output-text">{{ stt_text }}</div>
+  {% endif %}
+
+  {% if tts_audio %}
+    <h3>Audio</h3>
+    <audio controls>
+      <source src="{{ tts_audio }}" type="audio/mpeg">
+    </audio>
+  {% endif %}
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function(){
+  let mediaRecorder;
+  let chunks=[];
+  let recording=false;
+  let lastBlob=null;
+  const btn=document.getElementById('recordBtn');
+  const status=document.getElementById('recordStatus');
+  const audioEl=document.getElementById('liveAudio');
+  const langSel=document.getElementById('liveTargetLang');
+  const srcSel=document.getElementById('liveSourceLang');
+  const modeUpload=document.getElementById('modeUpload');
+  const modeLive=document.getElementById('modeLive');
+  const uploadForm=document.getElementById('uploadForm');
+  const liveControls=document.getElementById('liveControls');
+  const translateBtn=document.getElementById('translateBtn');
+
+  async function start(){
+    try{
+      const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+      const mime = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm';
+      mediaRecorder=new MediaRecorder(stream,{mimeType:mime});
+      chunks=[];
+      mediaRecorder.ondataavailable=e=>{ if(e.data.size>0) chunks.push(e.data); };
+      mediaRecorder.onstop=async()=>{
+        lastBlob=new Blob(chunks,{type: mediaRecorder.mimeType || 'audio/webm'});
+        status.textContent='Ready to translate';
+      };
+      mediaRecorder.start();
+      recording=true;
+      btn.textContent='⏹ Stop Recording';
+      status.textContent='Recording...';
+    }catch(e){ status.textContent='Mic permission denied'; }
+  }
+
+  function stop(){
+    if(mediaRecorder && recording){
+      mediaRecorder.stop();
+      btn.textContent='🎙️ Start Recording';
+      recording=false;
+    }
+  }
+
+  btn.addEventListener('click', ()=> recording? stop(): start());
+  translateBtn.addEventListener('click', async ()=>{
+    if(!lastBlob){ status.textContent='Record first'; return; }
+    const form=new FormData();
+    form.append('audio', lastBlob, 'recording.webm');
+    form.append('tgt_lang', langSel.value || 'en');
+    if(srcSel.value) form.append('src_lang', srcSel.value);
+    status.textContent='Transcribing...';
+    const res=await fetch('{{ url_for('stt') }}',{method:'POST', body: form});
+    const data=await res.json();
+    status.textContent=data.text?('Done: '+data.text): (data.error||'Error');
+    if(data.audio){ audioEl.src='/' + data.audio; audioEl.style.display='block'; }
+  });
+
+  // Show only mode chooser initially
+  uploadForm.style.display='none';
+  liveControls.style.display='none';
+  modeUpload.addEventListener('click', ()=>{ uploadForm.style.display='block'; liveControls.style.display='none'; document.getElementById('modeChooser').style.display='none'; });
+  modeLive.addEventListener('click', ()=>{ uploadForm.style.display='none'; liveControls.style.display='block'; document.getElementById('modeChooser').style.display='none'; });
+})();
+</script>
+{% endblock %}

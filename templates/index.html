@@ -1,121 +1,399 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>WordWave - Translator & Speech</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 40px; background-color: #f9f9f9; }
-        h1 { text-align: center; }
-        form { background: #fff; padding: 20px; margin-bottom: 30px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
-        label { display: block; margin-top: 10px; font-weight: bold; }
-        input, select, textarea, button { margin-top: 5px; width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; }
-        button { background-color: #4CAF50; color: white; cursor: pointer; }
-        button:hover { background-color: #45a049; }
-        audio { margin-top: 10px; width: 100%; }
-        .error { color: red; font-weight: bold; margin-top: 10px; }
-        .output-text { background-color: #e6e6e6; padding: 10px; border-radius: 5px; margin-top: 10px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WordWave - Home</title>
+<style>
+  :root {
+    --bg: #f9fafb;
+    --card: #fff;
+    --muted: #6b7280;
+    --shadow: 0 2px 8px rgba(0,0,0,0.08);
+    --primary: #2563eb;
+    --hover: #1d4ed8;
+  }
+  
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body { 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    background: var(--bg); 
+    margin: 0; 
+    padding: 0;
+    min-height: 100vh;
+  }
+  
+  header { 
+    background: var(--primary); 
+    color: #fff; 
+    padding: 16px 24px; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+  
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  
+  .user-info span {
+    font-size: 0.9rem;
+    opacity: 0.9;
+  }
+  
+  .logout-btn {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.3s;
+  }
+  
+  .logout-btn:hover {
+    background: rgba(255,255,255,0.3);
+  }
+  
+  main { 
+    padding: 40px 24px; 
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .welcome-section {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  
+  .welcome-title {
+    font-size: 2.5rem;
+    color: #1f2937;
+    margin-bottom: 16px;
+    font-weight: 700;
+  }
+  
+  .welcome-subtitle {
+    font-size: 1.2rem;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  
+  .welcome-description {
+    font-size: 1rem;
+    color: var(--muted);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin-top: 40px;
+  }
+  
+  .feature-card {
+    background: var(--card);
+    padding: 32px 24px;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .feature-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    border-color: var(--primary);
+  }
+  
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary), #8b5cf6);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+  
+  .feature-card:hover::before {
+    transform: scaleX(1);
+  }
+  
+  .feature-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    display: block;
+  }
+  
+  .feature-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 12px;
+  }
+  
+  .feature-description {
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-bottom: 20px;
+  }
+  
+  .feature-btn {
+    background: var(--primary);
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    text-decoration: none;
+    display: inline-block;
+  }
+  
+  .feature-btn:hover {
+    background: var(--hover);
+  }
+  
+  .stats-section {
+    background: var(--card);
+    padding: 32px;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    margin-top: 40px;
+    text-align: center;
+  }
+  
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 24px;
+    margin-top: 24px;
+  }
+  
+  .stat-item {
+    padding: 16px;
+  }
+  
+  .stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--primary);
+    display: block;
+  }
+  
+  .stat-label {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-top: 4px;
+  }
+  
+  @media (max-width: 768px) {
+    .welcome-title {
+      font-size: 2rem;
+    }
+    
+    .features-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .feature-card {
+      padding: 24px 20px;
+    }
+  }
+</style>
 </head>
 <body>
-    <h1>WordWave Translator & Speech</h1>
+<header>
+  <div class="logo" style="display:flex;align-items:center;gap:12px">
+    <button id="burger" style="background:transparent;border:none;color:#fff;font-size:22px;cursor:pointer">☰</button>
+    <span>🌍 WordWave</span>
+  </div>
+  <div class="user-info">
+    <button class="logout-btn" onclick="window.location='{{ url_for('logout') }}'">Logout</button>
+  </div>
+</header>
 
-    <!-- Text Translation Form -->
-    <form action="/tts" method="post">
-        <h2>Text Translation</h2>
-        <label for="text">Enter Text:</label>
-        <textarea name="text" rows="3" placeholder="Type your text here..." required></textarea>
+<nav id="drawer" style="position:fixed;top:0;left:0;height:100vh;width:260px;background:#111827;color:#fff;padding:20px;transform:translateX(-100%);transition:transform .2s ease;z-index:1000">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+    <strong>Menu</strong>
+    <button id="closeDrawer" style="background:transparent;border:1px solid #374151;color:#fff;border-radius:6px;padding:4px 8px;cursor:pointer">✕</button>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <a href="{{ url_for('text_page') }}" style="color:#e5e7eb;text-decoration:none">Text</a>
+    <a href="{{ url_for('voice_page') }}" style="color:#e5e7eb;text-decoration:none">Voice</a>
+    <a href="{{ url_for('sign_page') }}" style="color:#e5e7eb;text-decoration:none">Sign</a>
+    <hr style="border-color:#374151">
+    <a href="{{ url_for('about_page') }}" style="color:#e5e7eb;text-decoration:none">About</a>
+    <a href="{{ url_for('contact_page') }}" style="color:#e5e7eb;text-decoration:none">Contact</a>
+    <a href="{{ url_for('help_page') }}" style="color:#e5e7eb;text-decoration:none">Help</a>
+  </div>
+</nav>
 
-        <label for="src_lang">Source Language (optional):</label>
-        <select name="src_lang">
-            <option value="">Auto Detect</option>
-            {% for code, name in languages.items() %}
-                <option value="{{ code }}">{{ name }}</option>
-            {% endfor %}
-        </select>
+<main>
+  <div class="welcome-section">
+    <h1 class="welcome-title">Welcome to WordWave</h1>
+    <p class="welcome-subtitle">Your Universal Translation Hub</p>
+    <p class="welcome-description">
+      Break down language barriers with our powerful translation tools. 
+      Translate text, voice, and sign language seamlessly across multiple languages.
+    </p>
+  </div>
 
-        <label for="tgt_lang">Translate To:</label>
-        <select name="tgt_lang" required>
-            {% for code, name in languages.items() %}
-                <option value="{{ code }}">{{ name }}</option>
-            {% endfor %}
-        </select>
+  <div class="features-grid">
+    <div class="feature-card" onclick="window.location.href='{{ url_for('text_page') }}'">
+      <span class="feature-icon">⌨️</span>
+      <h3 class="feature-title">Text Translation</h3>
+      <p class="feature-description">
+        Translate text instantly between 15+ languages with high accuracy. 
+        Perfect for documents, messages, and written content.
+      </p>
+      <a href="{{ url_for('text_page') }}" class="feature-btn">Start Translating</a>
+    </div>
 
-        <button type="submit">Translate Text & Generate Speech</button>
-    </form>
+    <div class="feature-card" onclick="window.location.href='{{ url_for('voice_page') }}'">
+      <span class="feature-icon">🎤</span>
+      <h3 class="feature-title">Voice Translation</h3>
+      <p class="feature-description">
+        Convert speech to text and translate in real-time. 
+        Upload audio files or record live voice for instant translation.
+      </p>
+      <a href="{{ url_for('voice_page') }}" class="feature-btn">Start Recording</a>
+    </div>
 
-    <!-- Voice Translation Form -->
-    <form action="/stt" method="post">
-        <h2>Voice Translation</h2>
+    <div class="feature-card" onclick="window.location.href='{{ url_for('sign_page') }}'">
+      <span class="feature-icon">🤟</span>
+      <h3 class="feature-title">Sign Language</h3>
+      <p class="feature-description">
+        Advanced gesture recognition using your camera. 
+        Translate sign language gestures into spoken words and text.
+      </p>
+      <a href="{{ url_for('sign_page') }}" class="feature-btn">Start Recognition</a>
+    </div>
+  </div>
 
-        <label>Record Your Voice:</label>
-        <button type="button" id="start-record">Start Recording</button>
-        <button type="button" id="stop-record" disabled>Stop Recording</button>
+  
+</main>
+</body>
+<script>
+(function(){
+  const drawer=document.getElementById('drawer');
+  const burger=document.getElementById('burger');
+  const close=document.getElementById('closeDrawer');
+  function open(){ drawer.style.transform='translateX(0)'; }
+  function hide(){ drawer.style.transform='translateX(-100%)'; }
+  burger&&burger.addEventListener('click', open);
+  close&&close.addEventListener('click', hide);
+})();
+</script>
+</html>
 
-        <input type="hidden" name="audio" id="audio-file">
-        <label for="tgt_lang">Translate Voice To:</label>
-        <select name="tgt_lang" required>
-            {% for code, name in languages.items() %}
-                <option value="{{ code }}">{{ name }}</option>
-            {% endfor %}
-        </select>
+<!-- All extra sections removed for simpler home screen -->
 
-        <button type="submit">Translate Voice & Generate Speech</button>
-    </form>
+</main>
 
-    <!-- Display Translated Text -->
-    {% if stt_text %}
-        <div class="output-text">
-            <strong>Translated Text:</strong>
-            <p>{{ stt_text }}</p>
-        </div>
-    {% endif %}
+<script>
+// Tab switching
+function openTab(tabId){
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+  event.target.classList.add('active');
+}
 
-    <!-- Play Audio -->
-    {% if tts_audio %}
-        <audio controls autoplay>
-            <source src="{{ tts_audio }}" type="audio/mpeg">
-        </audio>
-    {% endif %}
-
-    <!-- Error Message -->
-    {% if error %}
-        <div class="error">{{ error }}</div>
-    {% endif %}
-
-    <!-- Browser Recording Script -->
-    <script>
-        let mediaRecorder;
-        let audioChunks = [];
-
-        const startBtn = document.getElementById('start-record');
-        const stopBtn = document.getElementById('stop-record');
-        const audioInput = document.getElementById('audio-file');
-
-        startBtn.onclick = async () => {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorder = new MediaRecorder(stream);
-            audioChunks = [];
-
-            mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-            mediaRecorder.onstop = () => {
-                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-                const reader = new FileReader();
-                reader.onload = () => {
-                    audioInput.value = reader.result.split(',')[1]; // Base64
-                };
-                reader.readAsDataURL(audioBlob);
-            };
-
-            mediaRecorder.start();
-            startBtn.disabled = true;
-            stopBtn.disabled = false;
-        };
-
-        stopBtn.onclick = () => {
-            mediaRecorder.stop();
-            startBtn.disabled = false;
-            stopBtn.disabled = true;
-        };
-    </script>
+// Sign language scripts (keep your previous JS)
+let recognitionActive = false;
+let currentText = '';
+async function loadGestureMappings() {
+  try {
+    const response = await fetch('/api/sign/status');
+    const data = await response.json();
+    const mappings = data.gesture_mappings || {};
+    const mappingsHtml = Object.entries(mappings)
+      .map(([gesture, word]) => `<div><strong>${gesture}:</strong> ${word}</div>`).join('');
+    document.getElementById('gesture-mappings').innerHTML = mappingsHtml || 'No mappings available';
+  } catch {
+    document.getElementById('gesture-mappings').innerHTML = 'Error loading mappings';
+  }
+}
+async function startRecognition() {
+  try {
+    const response = await fetch('/api/sign/start', { method: 'POST' });
+    const data = await response.json();
+    if(data.status==='started'){
+      recognitionActive = true;
+      document.getElementById('start-recognition').disabled=true;
+      document.getElementById('stop-recognition').disabled=false;
+      document.getElementById('recognition-status').textContent='Active';
+      document.getElementById('recognition-status').style.color='#10b981';
+      pollStatus();
+    } else alert('Error: '+data.message);
+  } catch{ alert('Failed to start recognition'); }
+}
+async function stopRecognition() {
+  recognitionActive=false;
+  document.getElementById('start-recognition').disabled=false;
+  document.getElementById('stop-recognition').disabled=true;
+  document.getElementById('recognition-status').textContent='Inactive';
+  document.getElementById('recognition-status').style.color='var(--muted)';
+  await fetch('/api/sign/stop',{method:'POST'});
+}
+async function pollStatus() {
+  if(!recognitionActive) return;
+  try {
+    const response = await fetch('/api/sign/status');
+    const data = await response.json();
+    if(data.last_word && data.last_word!==currentText){
+      currentText=data.last_word;
+      document.getElementById('sign-output').textContent=currentText;
+      document.getElementById('last-word').textContent=`Last word: ${currentText}`;
+      document.getElementById('speak-text').disabled=false;
+      document.getElementById('copy-text').disabled=false;
+    }
+    setTimeout(pollStatus,500);
+  } catch{ setTimeout(pollStatus,1000); }
+}
+function speakText(){if(currentText) playText(currentText);}
+function copyText(){if(currentText) navigator.clipboard.writeText(currentText);}
+function clearText(){
+  currentText='';
+  document.getElementById('sign-output').textContent='Gesture recognition will appear here';
+  document.getElementById('last-word').textContent='Last word: None';
+  document.getElementById('speak-text').disabled=true;
+  document.getElementById('copy-text').disabled=true;
+}
+document.getElementById('start-recognition').onclick=startRecognition;
+document.getElementById('stop-recognition').onclick=stopRecognition;
+document.getElementById('toggle-mute').onclick=()=>fetch('/api/sign/toggle_mute',{method:'POST'});
+document.getElementById('speak-text').onclick=speakText;
+document.getElementById('copy-text').onclick=copyText;
+document.getElementById('clear-text').onclick=clearText;
+loadGestureMappings();
+</script>
 </body>
 </html>

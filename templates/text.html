@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Text Translation · WordWave{% endblock %}
+{% block content %}
+<section class="card">
+  <h2>Text Translation</h2>
+  <form id="textForm" onsubmit="return translateAndSpeak(event)">
+    <label>Enter text</label>
+    <textarea name="text" id="inputText" rows="4" style="width:100%;padding:8px;border-radius:8px"></textarea>
+
+    <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">
+      <div>
+        <label>From</label>
+        <select name="src_lang" id="srcLang">
+          <option value="">Auto Detect</option>
+          {% for code, lang in languages.items() %}
+            <option value="{{ code }}">{{ lang }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label>To</label>
+        <select name="tgt_lang" id="tgtLang">
+          {% for code, lang in languages.items() %}
+            <option value="{{ code }}">{{ lang }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <button class="btn" type="submit" style="margin-top:12px">Translate & Speak</button>
+  </form>
+
+  {% if error %}
+    <p style="color:red">{{ error }}</p>
+  {% endif %}
+
+  <div id="textResult" style="display:none">
+    <h3>Translated Text</h3>
+    <div class="output-text" id="translatedText"></div>
+    <div style="margin-top:10px">
+      <button class="btn" type="button" id="playBtn" style="display:none">🔊 Play Voice</button>
+      <audio id="ttsAudio" style="display:none"></audio>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function translateAndSpeak(e){
+  e.preventDefault();
+  const text=document.getElementById('inputText').value.trim();
+  const src=document.getElementById('srcLang').value;
+  const tgt=document.getElementById('tgtLang').value||'en';
+  if(!text){ return false; }
+  const form=new FormData();
+  form.append('text', text);
+  if(src) form.append('src_lang', src);
+  form.append('tgt_lang', tgt);
+  const res=await fetch('{{ url_for('tts') }}',{ method:'POST', body: form });
+  const data=await res.json();
+  const result=document.getElementById('textResult');
+  const out=document.getElementById('translatedText');
+  const audio=document.getElementById('ttsAudio');
+  const play=document.getElementById('playBtn');
+  if(data.text){ out.textContent=data.text; result.style.display='block'; }
+  if(data.audio){ audio.src='/' + data.audio; play.style.display='inline-block'; play.onclick=()=>{ audio.currentTime=0; audio.play(); }; }
+  return false;
+}
+</script>
+{% endblock %}

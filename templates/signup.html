@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WordWave - Sign Up</title>
+    <style>
+        :root {
+            --bg: #f9fafb;
+            --card: #fff;
+            --muted: #6b7280;
+            --shadow: 0 2px 8px rgba(0,0,0,0.08);
+            --primary: #2563eb;
+            --error: #ef4444;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .signup-container {
+            background: var(--card);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .title {
+            color: var(--muted);
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #374151;
+            font-weight: 500;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .btn {
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-bottom: 15px;
+        }
+        
+        .btn:hover {
+            background: #1d4ed8;
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .error {
+            color: var(--error);
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .login-link {
+            margin-top: 20px;
+            color: var(--muted);
+        }
+        
+        .login-link a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="signup-container">
+        <div class="logo">🌍 WordWave</div>
+        <div class="title">Create your account</div>
+        
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+        
+        <form method="POST" id="signupForm">
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input list="emailSuggestions" type="email" id="email" name="email" autocomplete="email" required>
+                <datalist id="emailSuggestions"></datalist>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            
+            <button type="submit" class="btn">Sign Up</button>
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='{{ url_for('google_login') }}'">Continue with Google</button>
+        </form>
+        <script>
+        (function(){
+          const KEY='ww_email_history';
+          const emailInput=document.getElementById('email');
+          const datalist=document.getElementById('emailSuggestions');
+          const form=document.getElementById('signupForm');
+          function load(){ try{ return JSON.parse(localStorage.getItem(KEY))||[] }catch(_){ return [] } }
+          function save(list){ try{ localStorage.setItem(KEY, JSON.stringify(list.slice(0,8))); }catch(_){} }
+          function render(){ const list=load(); datalist.innerHTML=list.map(e=>`<option value="${e}"></option>`).join(''); if(list.length&&!emailInput.value) emailInput.value=list[0]; }
+          function remember(email){ if(!email) return; const list=load(); const i=list.indexOf(email); if(i!==-1) list.splice(i,1); list.unshift(email); save(list); }
+          form.addEventListener('submit',()=>remember(emailInput.value.trim().toLowerCase()));
+          render();
+        })();
+        </script>
+        
+        <div class="login-link">
+            Already have an account? <a href="{{ url_for('login') }}">Sign in here</a>
+        </div>
+    </div>
+</body>
+</html>
+

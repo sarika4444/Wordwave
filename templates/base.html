@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}WordWave{% endblock %}</title>
+  <style>
+    :root {
+      --bg: #f9fafb;
+      --card: #fff;
+      --muted: #6b7280;
+      --shadow: 0 2px 8px rgba(0,0,0,0.08);
+      --primary: #2563eb;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: var(--primary);
+      color: #fff;
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header a {
+      color: #fff;
+      margin: 0 8px;
+      text-decoration: none;
+    }
+    main {
+      padding: 24px;
+    }
+    .card {
+      background: var(--card);
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
+    .btn {
+      background: var(--primary);
+      color: #fff;
+      padding: 8px 14px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .btn.secondary {
+      background: #e5e7eb;
+      color: #111;
+    }
+    .output-text {
+      background: #f3f4f6;
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 12px;
+      font-size: 1.1rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div><strong>🌍 WordWave</strong></div>
+    <nav>
+      <a href="{{ url_for('home') }}">Home</a>
+      <a href="{{ url_for('text_page') }}">Text</a>
+      <a href="{{ url_for('voice_page') }}">Voice</a>
+      <a href="{{ url_for('sign_page') }}">Sign</a>
+      <a href="{{ url_for('about_page') }}">About</a>
+      <a href="{{ url_for('contact_page') }}">Contact</a>
+      <a href="{{ url_for('help_page') }}">Help</a>
+    </nav>
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

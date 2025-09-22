@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WordWave - Sign Language Translation</title>
+    <style>
+        :root {
+            --bg: #f9fafb;
+            --card: #fff;
+            --muted: #6b7280;
+            --shadow: 0 2px 8px rgba(0,0,0,0.08);
+            --primary: #2563eb;
+            --hover: #1d4ed8;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+        }
+        
+        header {
+            background: var(--primary);
+            color: #fff;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: background-color 0.3s;
+        }
+        
+        .nav-links a:hover, .nav-links a.active {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        main {
+            padding: 40px 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .page-title {
+            font-size: 2.5rem;
+            color: #1f2937;
+            margin-bottom: 16px;
+            font-weight: 700;
+        }
+        
+        .page-subtitle {
+            font-size: 1.1rem;
+            color: var(--muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .sign-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            margin-bottom: 32px;
+        }
+        
+        .camera-section {
+            background: var(--card);
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+        }
+        
+        .camera-container {
+            width: 100%;
+            height: 400px;
+            background: #f0f0f0;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .camera-placeholder {
+            text-align: center;
+            color: var(--muted);
+        }
+        
+        .camera-placeholder .icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+            display: block;
+        }
+        
+        .camera-placeholder .text {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        
+        .camera-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+        
+        .recording-indicator {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: var(--error);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: none;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .controls {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: var(--hover);
+        }
+        
+        .btn-danger {
+            background: var(--error);
+            color: white;
+        }
+        
+        .btn-danger:hover:not(:disabled) {
+            background: #dc2626;
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .btn-secondary:hover:not(:disabled) {
+            background: #4b5563;
+        }
+        
+        .btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        .gesture-mappings {
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .gesture-mappings h4 {
+            color: #374151;
+            margin-bottom: 12px;
+            font-size: 1rem;
+        }
+        
+        .gesture-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .gesture-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+        }
+        
+        .gesture-name {
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .gesture-word {
+            color: var(--muted);
+        }
+        
+        .output-section {
+            background: var(--card);
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+        }
+        
+        .output-text {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 16px;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            border: 1px solid #e2e8f0;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--muted);
+        }
+        
+        .output-text.has-content {
+            color: #1f2937;
+            font-weight: 500;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .status-section {
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            margin-top: 20px;
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .status-label {
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .status-value {
+            color: var(--muted);
+        }
+        
+        .status-value.active {
+            color: var(--success);
+            font-weight: 600;
+        }
+        
+        .permission-request {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid #fbbf24;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .permission-request button {
+            background: var(--warning);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+        
+        .loading {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            color: var(--muted);
+            font-size: 14px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #e5e7eb;
+            border-top: 2px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            background: #fef2f2;
+            color: var(--error);
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid #fecaca;
+            margin-top: 16px;
+            display: none;
+        }
+        
+        .success-message {
+            background: #f0fdf4;
+            color: var(--success);
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid #bbf7d0;
+            margin-top: 16px;
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .sign-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-links {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .page-title {
+                font-size: 2rem;
+            }
+            
+            .camera-container {
+                height: 300px;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">🌍 WordWave</div>
+        <div class="nav-links">
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('text_page') }}">Text</a>
+            <a href="{{ url_for('voice_page') }}">Voice</a>
+            <a href="{{ url_for('sign_page') }}" class="active">Sign</a>
+            <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+        </div>
+    </header>
+
+    <main>
+        <div class="page-header">
+            <h1 class="page-title">Sign Language Translation</h1>
+            <p class="page-subtitle">
+                Advanced gesture recognition using your camera. 
+                Translate sign language gestures into spoken words and text.
+            </p>
+        </div>
+
+        <div class="sign-container">
+            <!-- Camera Section -->
+            <div class="camera-section">
+                <h3 style="color: #374151; margin-bottom: 16px;">Camera Feed</h3>
+                
+                <div class="camera-container" id="cameraContainer">
+                    <div class="camera-placeholder" id="cameraPlaceholder">
+                        <span class="icon">📹</span>
+                        <div class="text">Camera will start when you click "Start Recognition"</div>
+                    </div>
+                    <video id="cameraVideo" class="camera-video" style="display:none;" autoplay muted playsinline></video>
+                    <canvas id="overlay" style="position:absolute;top:0;left:0;width:100%;height:100%"></canvas>
+                    <div class="recording-indicator" id="recordingIndicator">REC</div>
+                </div>
+                
+                <div class="controls">
+                    <button class="btn btn-primary" id="startBtn" onclick="startRecognition()">
+                        <span>🎬</span> Start Recognition
+                    </button>
+                    <button class="btn btn-danger" id="stopBtn" onclick="stopRecognition()" disabled>
+                        <span>⏹</span> Stop Recognition
+                    </button>
+                    <button class="btn btn-secondary" id="muteBtn" onclick="toggleMute()">
+                        <span>🔊</span> Unmute
+                    </button>
+                </div>
+                
+                <div class="permission-request" id="permissionRequest" style="display: none;">
+                    <p>Camera access is required for sign language recognition. Please allow camera access to continue.</p>
+                    <button onclick="requestCameraPermission()">Grant Permission</button>
+                </div>
+                
+                <div class="gesture-mappings">
+                    <h4>Supported Gestures</h4>
+                    <div class="gesture-list" id="gestureList">
+                      <div class="gesture-item"><span class="gesture-name">👋</span><span class="gesture-word">Hello (wave hand)</span></div>
+                      <div class="gesture-item"><span class="gesture-name">🤚</span><span class="gesture-word">Stop (palm outward)</span></div>
+                      <div class="gesture-item"><span class="gesture-name">👍</span><span class="gesture-word">Good / Yes / Okay</span></div>
+                      <div class="gesture-item"><span class="gesture-name">👎</span><span class="gesture-word">Bad / No</span></div>
+                      <div class="gesture-item"><span class="gesture-name">🤟</span><span class="gesture-word">I love you</span></div>
+                      <div class="gesture-item"><span class="gesture-name">👏</span><span class="gesture-word">Applause / Good job (✨)</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Output Section -->
+            <div class="output-section">
+                <h3 style="color: #374151; margin-bottom: 16px;">Recognition Output</h3>
+                
+                <div class="output-text" id="outputText">
+                    Gesture recognition will appear here
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" id="speakBtn" onclick="speakText()" disabled>
+                        <span>🔊</span> Speak
+                    </button>
+                    <button class="btn btn-secondary" id="copyBtn" onclick="copyText()" disabled>
+                        <span>📋</span> Copy
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearText()">
+                        <span>🗑️</span> Clear
+                    </button>
+                </div>
+                
+                <div class="status-section">
+                    <div class="status-item">
+                        <span class="status-label">Status:</span>
+                        <span class="status-value" id="statusValue">Inactive</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Last Word:</span>
+                        <span class="status-value" id="lastWordValue">None</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Audio:</span>
+                        <span class="status-value" id="audioStatus">Enabled</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <span>Starting recognition...</span>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+    </main>
+
+    <script>
+        let recognitionActive = false;
+        let currentText = '';
+        let isMuted = false;
+        let stream = null;
+
+        // Init
+        window.addEventListener('load', async () => {
+            document.getElementById('permissionRequest').style.display = 'none';
+            try{
+              const res = await fetch('/api/sign/status');
+              const data = await res.json();
+              const list = document.getElementById('gestureList');
+              const mappings = data.gesture_mappings || {};
+              const pretty = {
+                'fist':'Fist','open':'Open Hand','thumbs_up':'Thumbs Up','thumbs_down':'Thumbs Down','victory':'Victory','iloveyou':'I Love You','thankyou':'Thank You','welcome':'Welcome','sarika':'This is Sarika'
+              };
+              list.innerHTML = Object.entries(mappings).map(([k,v])=>`<div class="gesture-item"><span class="gesture-name">${pretty[k]||k}</span><span class="gesture-word">${v}</span></div>`).join('');
+            }catch(_){}
+        });
+
+        async function requestCameraPermission() {
+            try {
+                await navigator.mediaDevices.getUserMedia({ video: true });
+                document.getElementById('permissionRequest').style.display = 'none';
+                showSuccess('Camera permission granted!');
+            } catch (error) {
+                showError('Camera permission denied. Please enable camera access in your browser settings.');
+            }
+        }
+
+        async function startRecognition() {
+            try {
+                showLoading(true);
+                hideMessages();
+
+                const response = await fetch('/api/sign/start', { method: 'POST' });
+                const data = await response.json();
+
+                if (data.status === 'started') {
+                    recognitionActive = true;
+                    // Start browser camera
+                    try {
+                      stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
+                      const video = document.getElementById('cameraVideo');
+                      if (video) {
+                        video.srcObject = stream;
+                        video.style.display = 'block';
+                      }
+                    } catch (e) {
+                      showError('Please allow camera access in your browser.');
+                    }
+
+                    document.getElementById('cameraPlaceholder').style.display = 'none';
+                    document.getElementById('recordingIndicator').style.display = 'block';
+                    
+                    // Update UI
+                    document.getElementById('startBtn').disabled = true;
+                    document.getElementById('stopBtn').disabled = false;
+                    document.getElementById('statusValue').textContent = 'Active';
+                    document.getElementById('statusValue').classList.add('active');
+                    
+                    showSuccess('Recognition started successfully!');
+                    initClientHands();
+                } else {
+                    showError('Error: ' + data.message);
+                }
+            } catch (error) {
+                showError('Failed to start recognition. Please check your camera.');
+                console.error('Recognition error:', error);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function stopRecognition() {
+            try {
+                recognitionActive = false;
+                // Stop camera
+                if (stream) { stream.getTracks().forEach(t=>t.stop()); stream=null; }
+                const video=document.getElementById('cameraVideo');
+                if (video) { video.style.display='none'; video.srcObject=null; }
+                document.getElementById('cameraPlaceholder').style.display = 'block';
+                document.getElementById('recordingIndicator').style.display = 'none';
+                
+                // Update UI
+                document.getElementById('startBtn').disabled = false;
+                document.getElementById('stopBtn').disabled = true;
+                document.getElementById('statusValue').textContent = 'Inactive';
+                document.getElementById('statusValue').classList.remove('active');
+                
+                await fetch('/api/sign/stop', { method: 'POST' });
+                showSuccess('Recognition stopped.');
+            } catch (error) {
+                showError('Failed to stop recognition.');
+                console.error('Stop error:', error);
+            }
+        }
+
+        // Client-side detection with MediaPipe
+        let mpReady=false, hands=null, mpCamera=null, rafId=null, ctx=null;
+        async function loadScript(src){ return new Promise((res,rej)=>{ const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=rej; document.body.appendChild(s); }); }
+        async function initClientHands(){
+          if(!mpReady){
+            await loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js');
+            await loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js');
+            mpReady=true;
+          }
+          hands = new Hands.Hands({ locateFile: (f)=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}` });
+          hands.setOptions({ maxNumHands:1, modelComplexity:1, minDetectionConfidence:0.8, minTrackingConfidence:0.8 });
+          hands.onResults(onResultsClient);
+          const video=document.getElementById('cameraVideo');
+          const overlay=document.getElementById('overlay');
+          ctx=overlay.getContext('2d');
+          mpCamera = new Camera(video, { onFrame: async ()=>{ await hands.send({ image: video }); }, width:640, height:480 });
+          mpCamera.start();
+        }
+        function onResultsClient(res){
+          const video=document.getElementById('cameraVideo');
+          const overlay=document.getElementById('overlay');
+          overlay.width=video.videoWidth; overlay.height=video.videoHeight; ctx.clearRect(0,0,overlay.width,overlay.height);
+          if(res.multiHandLandmarks && res.multiHandLandmarks.length){
+            const lm=res.multiHandLandmarks[0];
+            // draw skeleton thin
+            ctx.strokeStyle='rgb(80,120,240)'; ctx.lineWidth=1;
+            const conn=[[0,1],[1,2],[2,3],[3,4],[5,9],[9,13],[13,17],[5,6],[6,7],[7,8],[9,10],[10,11],[11,12],[13,14],[14,15],[15,16],[17,18],[18,19],[19,20]];
+            conn.forEach(([a,b])=>{ ctx.beginPath(); ctx.moveTo(lm[a].x*overlay.width,lm[a].y*overlay.height); ctx.lineTo(lm[b].x*overlay.width,lm[b].y*overlay.height); ctx.stroke(); });
+            ctx.fillStyle='rgb(80,200,120)'; lm.forEach(p=>{ ctx.beginPath(); ctx.arc(p.x*overlay.width,p.y*overlay.height,2,0,Math.PI*2); ctx.fill(); });
+            const gesture = detectClientGesture(lm);
+            const map={ open:'Hello', thumbs_up:'Good / Yes / Okay', thumbs_down:'Bad / No', iloveyou:'I love you', fist:'Stop', clap:'Applause / Good job' };
+            const word = map[gesture];
+            if(word && word!==currentText){ currentText=word; document.getElementById('outputText').textContent=currentText; document.getElementById('outputText').classList.add('has-content'); document.getElementById('lastWordValue').textContent=currentText; document.getElementById('speakBtn').disabled=false; document.getElementById('copyBtn').disabled=false; }
+          }
+        }
+        function detectClientGesture(lm){
+          const tip=[4,8,12,16,20];
+          const up=tip.map((id,i)=> lm[id].y < lm[id-2].y );
+          const thumbDown = lm[4].y > lm[3].y + 0.02; const thumbUp = lm[4].y < lm[3].y - 0.02;
+          if(up.every(v=>v)) return 'open';
+          if(thumbUp && !up.slice(1).some(Boolean)) return 'thumbs_up';
+          if(thumbDown && !up.slice(1).some(Boolean)) return 'thumbs_down';
+          if(up[0] && up[1] && !up[2] && !up[3] && up[4]) return 'iloveyou';
+          if(up.every(v=>!v)) return 'fist';
+          return 'open';
+        }
+
+        async function toggleMute() {
+            try {
+                const response = await fetch('/api/sign/toggle_mute', { method: 'POST' });
+                const data = await response.json();
+                isMuted = data.mute;
+                
+                const muteBtn = document.getElementById('muteBtn');
+                const audioStatus = document.getElementById('audioStatus');
+                
+                if (isMuted) {
+                    muteBtn.innerHTML = '<span>🔇</span> Mute';
+                    audioStatus.textContent = 'Disabled';
+                } else {
+                    muteBtn.innerHTML = '<span>🔊</span> Unmute';
+                    audioStatus.textContent = 'Enabled';
+                }
+            } catch (error) {
+                showError('Failed to toggle mute.');
+            }
+        }
+
+        function speakText() {
+            if (currentText) {
+                // Use Web Speech API for text-to-speech
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(currentText);
+                    utterance.lang = 'en-US';
+                    speechSynthesis.speak(utterance);
+                } else {
+                    showError('Text-to-speech not supported in this browser.');
+                }
+            }
+        }
+
+        function copyText() {
+            if (currentText) {
+                navigator.clipboard.writeText(currentText).then(() => {
+                    showSuccess('Text copied to clipboard!');
+                }).catch(() => {
+                    showError('Failed to copy text. Please try again.');
+                });
+            }
+        }
+
+        function clearText() {
+            currentText = '';
+            document.getElementById('outputText').textContent = 'Gesture recognition will appear here';
+            document.getElementById('outputText').classList.remove('has-content');
+            document.getElementById('lastWordValue').textContent = 'None';
+            document.getElementById('speakBtn').disabled = true;
+            document.getElementById('copyBtn').disabled = true;
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'flex' : 'none';
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+
+        function hideMessages() {
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (recognitionActive) {
+                stopRecognition();
+            }
+        });
+    </script>
+</body>
+</html>

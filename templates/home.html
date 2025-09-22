@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Home · WordWave{% endblock %}
+{% block content %}
+<section class="card">
+  <h2>Welcome to WordWave 🌍</h2>
+  <p style="color:var(--muted)">
+    Translate effortlessly between <strong>Text</strong>, <strong>Voice</strong>, and <strong>Sign Language</strong>.
+  </p>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:20px">
+    <a href="{{ url_for('sign_translation') }}" class="card" style="text-align:center;text-decoration:none;color:inherit">
+      <div style="font-size:40px">🤟</div>
+      <h3>Sign Language</h3>
+      <p style="color:var(--muted)">Camera-based gesture recognition</p>
+    </a>
+    <a href="{{ url_for('voice_translation') }}" class="card" style="text-align:center;text-decoration:none;color:inherit">
+      <div style="font-size:40px">🎤</div>
+      <h3>Voice Translation</h3>
+      <p style="color:var(--muted)">Real-time speech translation</p>
+    </a>
+    <a href="{{ url_for('text_translation') }}" class="card" style="text-align:center;text-decoration:none;color:inherit">
+      <div style="font-size:40px">⌨️</div>
+      <h3>Text Translation</h3>
+      <p style="color:var(--muted)">Instant multilingual text translation</p>
+    </a>
+  </div>
+</section>
+{% endblock %}
