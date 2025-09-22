@@ -11,6 +11,7 @@ import threading
 import time
 import json
 from werkzeug.security import generate_password_hash, check_password_hash
+from dotenv import load_dotenv 
 
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-change-this'
@@ -39,11 +40,13 @@ def login_required(f):
 # -------------------------------
 stt_model = whisper.load_model("small")
 translator = Translator()
-HF_TOKENS = [
-    "REMOVED",
-    "REMOVED",
-]
+load_dotenv()
 
+HF_TOKENS = [
+    os.getenv("HF_TOKEN1"),
+    os.getenv("HF_TOKEN2"),
+    os.getenv("HF_TOKEN3"),
+]
 # -------------------------------
 # MediaPipe Hands Setup
 # -------------------------------
